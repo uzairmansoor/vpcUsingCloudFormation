@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion : "2010-09-09"
+Description: "Driver Template for deploying VPC"
+
+Parameters:
+  project:
+    Type: String
+    Description:  Project Name
+    Default: devops-poc
+  app:
+    Type: String
+    Description:  Application Name
+    Default: app
+  env:
+    Type: String
+    AllowedValues: 
+     - prod
+     - dev
+     - qa
+     - uat
+    Description:  Environment Name
+    Default: dev
+  s3ArtifactPath:
+    Type: String
+    Description: Artifact Bucket Path
+    Default: "https://iacartifacts-devops-youtube-tutorials-us-east-1-355986150263.s3.amazonaws.com/code/cfn/services"
+
+Resources:
+  vpc:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${s3ArtifactPath}/vpc/vpc-app.yml"
+      Parameters:
+        project: !Ref project
+        app: !Ref app
+        env: !Ref env
+        cidrBlock: 10.31.0.0/16
+        publicSubnetACidrBlock1: 10.31.0.0/21
+        publicSubnetBCidrBlock2: 10.31.8.0/21
+        privateSubnetACidrBlock1: 10.31.16.0/21
+        privateSubnetBCidrBlock2: 10.31.24.0/21
+        dnsSupport: True
+        dnsHostnames: True
+        publicIpOnLaunchforPublicSubnet: True
+        availabilityZone1: us-east-1a
+        availabilityZone2: us-east-1b
+
+Outputs:
+  vpc:
+    Description: VPC Stack
+    Value: !Ref vpc
+    Export:
+      Name: !Sub "${project}-${app}-${env}-vpcStack"
